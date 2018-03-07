@@ -5,6 +5,15 @@ const app = express();
 const server = app.listen( 8000 );
 const io = socket( server );
 
-io.on( "connection", function( socket ) {
+io.on( "connection", client => {
 	console.log("New user");
+
+	client.on("disconnect", () =>
+		console.log("User disconnected")
+	);
+
+	client.on("newMessage", message =>
+		console.log( message )
+	);
+
 });

@@ -12,8 +12,8 @@ io.on( "connection", client => {
 		console.log("User disconnected")
 	);
 
-	client.on("newMessage", message =>
-		console.log( message )
-	);
+	client.on("newMessage", message => {
+		io.sockets.emit("newMessage", message );
+	});
 
 });

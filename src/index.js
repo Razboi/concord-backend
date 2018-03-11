@@ -6,14 +6,20 @@ const server = app.listen( 8000 );
 const io = socket( server );
 
 io.on( "connection", client => {
-	console.log("New user");
+
+	client.username = "Anonymous";
+
+	client.on("changeUsername", username => {
+		console.log( username );
+		client.username = username;
+	});
 
 	client.on("disconnect", () =>
 		console.log("User disconnected")
 	);
 
 	client.on("newMessage", message => {
-		io.sockets.emit("newMessage", message );
+		io.sockets.emit("newMessage", client.username + ": " + message );
 	});
 
 });

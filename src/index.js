@@ -1,18 +1,23 @@
 const socket = require("socket.io");
 const express = require("express");
-const passportSetup = require("./config/passportSetup");
-const passport = require("passport");
-
 const app = express();
+const passportSetup = require("./config/passportSetup");
+const oauth = require("./routes/oauth");
+const mongoose = require("mongoose");
+// env variables
+const dotenv = require("dotenv").config();
 
 
-app.get("/oauth/google", passport.authenticate("google", {
-		scope: [ "profile" ]
-	}) );
+// database
+mongoose.connect( process.env.MONGODB_URL );
+// routes
+app.use("/oauth", oauth );
 
-const server = app.listen( 8000 );
+// start server and add sockets
+const server = app.listen( 8000, () => console.log("Listening on 8000") );
 const io = socket( server );
 
+// sockets config
 io.on( "connection", client => {
 	client.username = "Anonymous";
 

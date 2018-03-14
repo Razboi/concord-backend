@@ -4,10 +4,11 @@ const app = express();
 const passportSetup = require("./config/passportSetup");
 const oauth = require("./routes/oauth");
 const mongoose = require("mongoose");
+const passport = require("passport");
 // env variables
 const dotenv = require("dotenv").config();
 
-
+app.use( passport.initialize() );
 // database
 mongoose.connect( process.env.MONGODB_URL );
 // routes

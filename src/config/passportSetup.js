@@ -17,28 +17,30 @@ passport.use(
 		clientID: keys.google.clientID,
 		clientSecret: keys.google.clientSecret,
 		callbackURL: "/oauth/google/redirect"
-	}, (token, tokenSecret, profile, done) => {
+	}, (accessToken, refreshToken, profile, cb) => {
 		// callback
 		// check if user already exists
 		User.findOne({
 			googleID: profile.id
 		})
 		.then( currentUser => {
+			// if already exists in the db return the existing user
 			if ( currentUser ) {
 				console.log("user already exists");
 				generateToken( currentUser );
-				return done( null, currentUser );
+				return cb( null, currentUser );
 			}
+			// if doesn't exists create a new user
 			new User({
 				name: profile.displayName,
 				googleID: profile.id
 			})
 			.save()
-			// once is finish saving the new user
+			// once is finish saving, return the new user
 			.then( newUser => {
 				console.log( newUser );
 				generateToken( newUser );
-				return done( null, newUser );
+				return cb( null, newUser );
 				})
 			.catch( err => console.log( err ) );
 		});

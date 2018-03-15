@@ -9,7 +9,7 @@ router.get("/google", passport.authenticate("google", {
 
 router.get("/google/redirect", passport.authenticate("google", { session: false }),
 (req, res) => {
-	res.send( req.user );
+	res.send("12345Token");
 });
 
 module.exports = router;

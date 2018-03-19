@@ -1,16 +1,18 @@
 const socket = require("socket.io");
 const express = require("express");
 const app = express();
-const passportSetup = require("./config/passportSetup");
 const oauth = require("./routes/oauth");
 const mongoose = require("mongoose");
-const passport = require("passport");
 // env variables
 const dotenv = require("dotenv").config();
+var bodyParser = require("body-parser");
 
-app.use( passport.initialize() );
 // database
 mongoose.connect( process.env.MONGODB_URL );
+
+// parser
+app.use( bodyParser.json() );
+
 // routes
 app.use("/oauth", oauth );
 

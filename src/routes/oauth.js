@@ -4,15 +4,27 @@ const User = require("../models/User");
 const tokenGenerator = require("../utils/tokenGenerator");
 
 
-router.post("/google", (req, res) => {
+router.post("/google", (req, res, next) => {
 	const profile = req.body.profile;
+	// if theres no profile go to the error handler middleware
+	if ( !profile ) {
+		var err = new Error("Google didn't sent any user information");
+		err.statusCode = 401;
+		return next( err );
+	}
 	// check if user already exists
 	User.findOne({
-		googleID: profile.googleId
+		email: profile.email
 	})
 	.then( currentUser => {
-		// if already exists in the db return the existing user
+		// if already exists update the existing user with google data and return it
 		if ( currentUser ) {
+			if ( !currentUser.name || !currentUser.googleID ) {
+				console.log("updated");
+				currentUser.name = profile.name;
+				currentUser.googleID = profile.googleId;
+				currentUser.save();
+			}
 			const token = generateToken( currentUser );
 			res.send( token );
 		} else {
@@ -28,9 +40,9 @@ router.post("/google", (req, res) => {
 				const token = generateToken( newUser );
 				res.send( token );
 				})
-			.catch( err => console.log( err ) );
+			.catch( err => next( err ) );
 		}
-	});
+	}).catch( err => next( err ) );
 });
 
 module.exports = router;

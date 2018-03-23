@@ -5,6 +5,8 @@ const
 	oauth = require( "./routes/oauth" ),
 	auth = require( "./routes/auth" ),
 	mongoose = require( "mongoose" ),
+	User = require( "./models/User" ),
+	jwt = require( "jsonwebtoken" ),
 	// env variables
 	dotenv = require( "dotenv" ).config(),
 	bodyParser = require( "body-parser" ),
@@ -34,14 +36,15 @@ app.use(( err, req, res, next ) => {
 
 // sockets config
 io.on( "connection", client => {
-	client.username = "Anonymous";
 
-	client.on( "changeUsername", username => {
-		console.log( username );
-		client.username = username;
-	});
-
-	client.on( "newMessage", message => {
-		io.sockets.emit( "newMessage", client.username + ": " + message );
+	client.on( "newMessage", data => {
+		// get userId from token
+		const userId = jwt.verify( data.token, process.env.SECRET_JWT );
+		// get user from userId
+		User.findById( userId )
+			.then(( user ) => {
+				io.sockets.emit( "newMessage", user.email + ": " + data.message );
+			})
+			.catch( err => console.log( err ));
 	});
 });

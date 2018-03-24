@@ -6,7 +6,9 @@ const
 		name: String,
 		email: { type: String, required: true },
 		passwordHash: String,
-		googleID: String
+		googleID: String,
+		friends: [ { type: mongoose.Schema.Types.ObjectId, ref: "User" } ],
+		socketId: String
 	});
 
 UserSchema.methods.isValidPassword = function isValidPassword( password ) {

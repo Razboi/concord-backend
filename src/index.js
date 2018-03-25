@@ -34,6 +34,7 @@ app.use( "/users", users );
 
 // error middleware
 app.use(( err, req, res, next ) => {
+	console.log( "err middleware" );
 	console.log( err );
 	if ( !err.statusCode ) {
 		res.status( 500 );
@@ -44,11 +45,15 @@ app.use(( err, req, res, next ) => {
 });
 
 // sockets config
-io.on( "connection", client => {
+io.on( "connection", ( client, next ) => {
 	// register event saves the userId and writes the socketId to the user schema
 	client.on( "register", token => {
 		// get userId from token
-		userId = jwt.verify( token, process.env.SECRET_JWT );
+		try {
+			userId = jwt.verify( token, process.env.SECRET_JWT );
+		} catch ( err ) {
+			return err;
+		}
 		// saves the clientId to the socket session
 		client.userId = userId;
 		// get user and set sockedId
@@ -74,8 +79,12 @@ io.on( "connection", client => {
 							io.sockets.sockets[ receiver.socketId ].emit(
 								"newMessage", sender.email + ": " + data.message
 							);
-						})
-						.catch( err => console.log( err ));
+						}).catch( err => {
+							console.log( err );
+							io.sockets.sockets[ sender.socketId ].emit(
+								"newMessage", "Error: The user is offline"
+							);
+						});
 			})
 			.catch( err => console.log( err ));
 	});

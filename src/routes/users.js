@@ -44,7 +44,12 @@ router.post( "/addFriend", ( req, res, next ) => {
 });
 
 router.post( "/friends", ( req, res, next ) => {
-	const userId = jwt.verify( req.body.token, process.env.SECRET_JWT );
+	try {
+		const userId = jwt.verify( req.body.token, process.env.SECRET_JWT );
+	} catch ( err ) {
+		err.statusCode = 401;
+		return next( err );
+	}
 	User.findById( userId )
 		.then( user => res.send( user.friends ))
 		.catch( err => next( err ));

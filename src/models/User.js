@@ -7,7 +7,7 @@ const
 		email: { type: String, required: true },
 		passwordHash: String,
 		googleID: String,
-		friends: [ { type: mongoose.Schema.Types.ObjectId, ref: "User" } ],
+		friends: [ { type: String } ],
 		socketId: String
 	});
 

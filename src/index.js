@@ -4,6 +4,7 @@ const
 	app = express(),
 	oauth = require( "./routes/oauth" ),
 	auth = require( "./routes/auth" ),
+	users = require( "./routes/users" ),
 	mongoose = require( "mongoose" ),
 	User = require( "./models/User" ),
 	jwt = require( "jsonwebtoken" ),
@@ -29,6 +30,7 @@ app.use( bodyParser.json());
 // routes middleware
 app.use( "/oauth", oauth );
 app.use( "/auth", auth );
+app.use( "/users", users );
 
 // error middleware
 app.use(( err, req, res, next ) => {
@@ -43,7 +45,6 @@ app.use(( err, req, res, next ) => {
 
 // sockets config
 io.on( "connection", client => {
-	console.log( io.sockets.sockets );
 	// register event saves the userId and writes the socketId to the user schema
 	client.on( "register", token => {
 		// get userId from token

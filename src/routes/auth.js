@@ -10,7 +10,7 @@ router.post( "/login", ( req, res, next ) => {
 	if ( !req.body ) {
 		err = new Error( "Empty credentials" );
 		err.statusCode = 401;
-		next( err );
+		return next( err );
 	}
 	User.findOne({
 		email: req.body.credentials.email
@@ -23,7 +23,7 @@ router.post( "/login", ( req, res, next ) => {
 			} else {
 				err = new Error( "Invalid credentials" );
 				err.statusCode = 401;
-				next( err );
+				return next( err );
 			}
 		})
 		.catch( err => next( err ));
@@ -34,7 +34,7 @@ router.post( "/signup", ( req, res, next ) => {
 	if ( !req.body ) {
 		err = new Error( "Empty credentials" );
 		err.statusCode = 401;
-		next( err );
+		return next( err );
 	}
 	User.findOne({
 		email: req.body.credentials.email
@@ -43,7 +43,7 @@ router.post( "/signup", ( req, res, next ) => {
 			if ( user ) {
 				err = new Error( "Email already registered" );
 				err.statusCode = 422;
-				next( err );
+				return next( err );
 			} else {
 				new User({
 					email: req.body.credentials.email,

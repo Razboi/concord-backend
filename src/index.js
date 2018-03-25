@@ -17,7 +17,12 @@ const
 server.listen( 8000, () => console.log( "Listening on 8000" ));
 
 // database
-mongoose.connect( process.env.MONGODB_URL );
+mongoose.connect( process.env.MONGODB_URL, ( err, db ) => {
+	if ( err ) {
+		throw err;
+	}
+	console.log( "MongoDB connected" );
+});
 
 // parser middleware
 app.use( bodyParser.json());
@@ -38,7 +43,7 @@ app.use(( err, req, res, next ) => {
 
 // sockets config
 io.on( "connection", client => {
-
+	console.log( io.sockets.sockets );
 	// register event saves the userId and writes the socketId to the user schema
 	client.on( "register", token => {
 		// get userId from token
@@ -55,18 +60,18 @@ io.on( "connection", client => {
 	});
 
 	client.on( "newMessage", data => {
-		console.log( socket.to );
-		// get user from userId
+		// get sender from the userId extracted from the token on registration
 		User.findById( client.userId )
-			.then(( user ) => {
+			.then(( sender ) => {
+				// if there's no receiver send the message to everyone
+				// else find the receiver by email and send the message to his socketId
 				data.to == "" ?
-					io.emit( "newMessage", user.email + ": " + data.message )
+					io.emit( "newMessage", sender.email + ": " + data.message )
 					:
-					User.find({ email: data.to })
-						.then( user => {
-							console.log( user );
-							client.to[ user.socketId ].emit(
-								"newMessage", user.email + ": " + data.message
+					User.findOne({ email: data.to })
+						.then( receiver => {
+							io.sockets.sockets[ receiver.socketId ].emit(
+								"newMessage", sender.email + ": " + data.message
 							);
 						})
 						.catch( err => console.log( err ));

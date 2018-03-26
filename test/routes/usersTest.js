@@ -44,7 +44,7 @@ describe( "POST addFriend", function() {
 				token: token
 			})
 			.end(( err, res ) => {
-				res.should.have.status( 400 );
+				res.should.have.status( 422 );
 				done();
 			});
 	});

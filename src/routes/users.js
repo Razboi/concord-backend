@@ -31,7 +31,7 @@ router.post( "/addFriend", ( req, res, next ) => {
 					// if theres no friend throw error
 					if ( !friend ) {
 						err = new Error( "No user matching that username was found" );
-						err.statusCode = 400;
+						err.statusCode = 422;
 						return next( err );
 					}
 					// add friend to user friends, save and return the email of the added friend

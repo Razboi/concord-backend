@@ -5,7 +5,9 @@ const
 	jwt = require( "jsonwebtoken" );
 
 router.post( "/addFriend", ( req, res, next ) => {
-	var err;
+	var
+		err,
+		userId;
 	// check if theres the necessary data
 	if ( !req.body.friend ) {
 		err = new Error( "No user provided" );
@@ -13,16 +15,16 @@ router.post( "/addFriend", ( req, res, next ) => {
 		return next( err );
 	}
 	// get userId from token
-	const userId = jwt.verify( req.body.token, process.env.SECRET_JWT );
+	try {
+		userId = jwt.verify( req.body.token, process.env.SECRET_JWT );
+	} catch ( err ) {
+		// if the token is invalid throw error
+		err.statusCode = 401;
+		return next( err );
+	}
 	// find user by userId
 	User.findById( userId )
 		.then( user => {
-		// if theres no user throw error
-			if ( !user ) {
-				err = new Error( "Invalid session, try to log out and log in again" );
-				err.statusCode = 401;
-				return next( err );
-			}
 			// find friend
 			User.findOne({ email: req.body.friend })
 				.then( friend => {
@@ -35,7 +37,7 @@ router.post( "/addFriend", ( req, res, next ) => {
 					// add friend to user friends, save and return the email of the added friend
 					user.friends.push( friend.email );
 					user.save()
-						.then(() => res.sendStatus( 200 ))
+						.then(() => res.sendStatus( 201 ))
 						.catch( err => next( err ));
 				})
 				.catch( err => next( err ));

@@ -35,7 +35,7 @@ router.post( "/addFriend", ( req, res, next ) => {
 					// add friend to user friends, save and return the email of the added friend
 					user.friends.push( friend.email );
 					user.save()
-						.then(() => res.send( friend.email ))
+						.then(() => res.sendStatus( 200 ))
 						.catch( err => next( err ));
 				})
 				.catch( err => next( err ));
@@ -44,8 +44,9 @@ router.post( "/addFriend", ( req, res, next ) => {
 });
 
 router.post( "/friends", ( req, res, next ) => {
+	var userId;
 	try {
-		const userId = jwt.verify( req.body.token, process.env.SECRET_JWT );
+		userId = jwt.verify( req.body.token, process.env.SECRET_JWT );
 	} catch ( err ) {
 		err.statusCode = 401;
 		return next( err );

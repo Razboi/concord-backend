@@ -6,14 +6,13 @@ const
 	auth = require( "./routes/auth" ),
 	users = require( "./routes/users" ),
 	mongoose = require( "mongoose" ),
-	User = require( "./models/User" ),
-	jwt = require( "jsonwebtoken" ),
 	// env variables
 	dotenv = require( "dotenv" ).config(),
 	bodyParser = require( "body-parser" ),
 	// start server and add sockets
 	server = require( "http" ).Server( app ),
-	io = socket( server );
+	io = socket( server ),
+	socketsEvents = require( "./socketsEvents" )( io );
 
 server.listen( 8000, () => console.log( "Listening on 8000" ));
 
@@ -34,7 +33,6 @@ app.use( "/users", users );
 
 // error middleware
 app.use(( err, req, res, next ) => {
-	console.log( "err middleware" );
 	console.log( err );
 	if ( !err.statusCode ) {
 		res.status( 500 );
@@ -42,50 +40,4 @@ app.use(( err, req, res, next ) => {
 		res.status( err.statusCode );
 	}
 	res.send( err.message );
-});
-
-// sockets config
-io.on( "connection", ( client, next ) => {
-	// register event saves the userId and writes the socketId to the user schema
-	client.on( "register", token => {
-		// get userId from token
-		try {
-			userId = jwt.verify( token, process.env.SECRET_JWT );
-		} catch ( err ) {
-			return err;
-		}
-		// saves the clientId to the socket session
-		client.userId = userId;
-		// get user and set sockedId
-		User.findById( userId )
-			.then(( user ) => {
-				user.socketId = client.id;
-				user.save();
-			})
-			.catch( err => console.log( err ));
-	});
-
-	client.on( "newMessage", data => {
-		// get sender from the userId extracted from the token on registration
-		User.findById( client.userId )
-			.then(( sender ) => {
-				// if there's no receiver send the message to everyone
-				// else find the receiver by email and send the message to his socketId
-				data.to == "" ?
-					io.emit( "newMessage", sender.email + ": " + data.message )
-					:
-					User.findOne({ email: data.to })
-						.then( receiver => {
-							io.sockets.sockets[ receiver.socketId ].emit(
-								"newMessage", sender.email + ": " + data.message
-							);
-						}).catch( err => {
-							console.log( err );
-							io.sockets.sockets[ sender.socketId ].emit(
-								"newMessage", "Error: The user is offline"
-							);
-						});
-			})
-			.catch( err => console.log( err ));
-	});
 });

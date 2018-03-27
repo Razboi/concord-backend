@@ -13,13 +13,15 @@ chai.use( chaiHttp );
 describe( "POST addFriend", function() {
 
 	var token;
+	// before running tests find the user, generate a token and clear user friends
 	before( function( done ) {
 		mongoose.connect( process.env.MONGODB_URL );
 		User.findOne({ email: "test@gmail.com" })
 			.then( user => {
-				console.log( 2 );
 				token = tokenGenerator( user );
-				done();
+				user.friends = [];
+				user.save()
+					.then(() => done());
 			});
 	});
 

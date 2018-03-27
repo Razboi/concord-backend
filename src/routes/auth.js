@@ -31,9 +31,9 @@ router.post( "/login", ( req, res, next ) => {
 
 router.post( "/signup", ( req, res, next ) => {
 	var err;
-	if ( !req.body ) {
+	if ( !req.body.credentials.email || !req.body.credentials.password ) {
 		err = new Error( "Empty credentials" );
-		err.statusCode = 401;
+		err.statusCode = 400;
 		return next( err );
 	}
 	User.findOne({

@@ -17,7 +17,7 @@ router.post( "/google", ( req, res, next ) => {
 	// if there's no token return 401 error
 	if ( !googleToken ) {
 		err = new Error( "Missing Google's token" );
-		err.statusCode = 401;
+		err.statusCode = 400;
 		return next( err );
 	}
 
@@ -59,7 +59,11 @@ router.post( "/google", ( req, res, next ) => {
 							.catch( err => next( err ));
 					}
 				}).catch( err => next( err ));
-		}).catch( err => next( err ));
+		}).catch(() => {
+			err = new Error( "Invalid Google token" );
+			err.statusCode = 401;
+			next( err );
+		});
 });
 
 module.exports = router;

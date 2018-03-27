@@ -11,7 +11,7 @@ const
 		socketId: String
 	});
 
-UserSchema.methods.isValidPassword = function isValidPassword( password ) {
+UserSchema.methods.isValidPassword = function( password ) {
 	if ( !this.passwordHash || !password ) {
 		return false;
 	}

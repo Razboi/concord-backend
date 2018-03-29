@@ -4,7 +4,7 @@ const
 
 module.exports = ( io ) => {
 	// sockets events
-	io.on( "connection", ( client, next ) => {
+	io.on( "connection", ( client ) => {
 		// register event saves the userId and writes the socketId to the user schema
 		client.on( "register", token => {
 			var userId;
@@ -14,7 +14,7 @@ module.exports = ( io ) => {
 			} catch ( err ) {
 				return err;
 			}
-			// saves the clientId to the socket session
+			// saves the userId to the socket session
 			client.userId = userId;
 			// get user and set sockedId
 			User.findById( userId )
